@@ -3,13 +3,8 @@
  */
 
 // グローバル変数の定義
-// const FREE_SHEET_ID = config_sheet.getRange('D6').getValue();     // freee用スプレッドシートオブジェクト
-// const SHEET_NAME_FREEE = config_sheet.getRange('D7').getValue();  // 注文データ転記先シート
-// const SHEET_NAME_PARTNERS = config_sheet.getRange('D8').getValue();  // プルダウンの参照先となる取引先管理シート
-
-const USE_SHEET_NAME     = "freee";      // プルダウンを使う側のシート名
-const SETTING_SHEET_NAME = "partners";   // プルダウンとそれに連動するリストを設定しているシート名
-const PARTNERS_NAME_ROW = 6;  // 「freee取引先名」がセットされている列番号
+const PULLDOWN_USE_SHEET     = "freee";      // プルダウンを取得する側のシート名
+const PARTNERS_NAME_ROW = 6;  // freeeシートにおいて、「freee取引先名」がセットされている列番号
 
 function copyOrderToFreeSheet() {
 
@@ -142,31 +137,30 @@ function setPulldowns() {
 }
 
 
-/** openByIDでスプレッドシートを呼び出す際は、ベット */
-function createTrigger() {
-  ScriptApp.newTrigger('setCustomMenu')
-  .forSpreadsheet(SHEET_ID)
-  .onOpen()
-  .create();
-}
-
-
 /**
  * freeeシートの「取引先名」プルダウンと「取引先ID」とを連動させるための処理
- * @brief: 選択された取引先名に対応する取引先IDを検索して、隣の列にセットする
+ * @brief: 取引先名がセットされたらそれに対応する取引先IDを隣の列にセットする
+ * 
+ * (※ トリガー設定中)
  */ 
-function onSelectedPartnerName(e) {
+function onSetPartnerName(e) {
   if(!isTargetCol(e)) return;  // 編集された列が連動をトリガーさせる列（「取引先名」列）かどうかをチェック
 
   const selected_partner_value = e.value;  // 編集が行われた(プルダウンが選択された)セルの値
   const changed_row = e.range.getRow();  // 編集された行
-  const use_sheet = e.source.getSheetByName(USE_SHEET_NAME);  // プルダウン連動を使う側のシート = freeeシート
+  const use_sheet = e.source.getSheetByName(PULLDOWN_USE_SHEET);  // プルダウン連動を使う側のシート = freeeシート
+  debug({
+    selected_partner_value: selected_partner_value,
+    changed_row: changed_row,
+    use_sheet: use_sheet.getName()
+  });
+
 
   // プルダウンリストとそれに連動させるリストデータ(取引先名リストおよび取引先IDリスト)を取得
-  const setting_sheet = e.source.getSheetByName(SETTING_SHEET_NAME);   // プルダウンリスト(取引先リスト)がセットされているシート
-  const pd_list = setting_sheet.getRange(4, 2, setting_sheet.getLastRow(), 2);  // 取引先名リスト列 + 取引先IDリスト列
+  const last_row = partners_sheet.getLastRow();
+  const pd_list = partners_sheet.getRange(4, 2, last_row - 3, 2).getValues();  // 取引先名リスト列 + 取引先IDリスト列
 
-  console.log(pd_list);
+  debug(pd_list.length);
   
   let linked_id = "";  // 名前に対応するIDを入れるための変数
   for (let i = 0; i < pd_list.length; i++) {
@@ -175,6 +169,7 @@ function onSelectedPartnerName(e) {
       break;
     }
   }
+  debug(linked_id);
 
   // 対応するIDを、プルダウン利用側のシート(freeeシート) の 「取引先ID」列 にセット
   const id_cell = use_sheet.getRange(changed_row, PARTNERS_NAME_ROW + 1);  // 「取引先名」列の隣の列
@@ -190,7 +185,7 @@ function isTargetCol(e) {
   if (!e.range.getValue()) return false;  // 「取引先名」が削除されたとき
 
   // 対象シート以外のシートの変更のときは無視
-  if (e.source.getSheetName !== USE_SHEET_NAME) return false;  // 利用側シート(freeeシート) に対する変更でないとき
+  if (e.source.getSheetName() !== PULLDOWN_USE_SHEET) return false;  // 利用側シート(freeeシート) に対する変更でないとき
 
   // 対象列以外の列の変更のときは無視
   if (e.range.getColumn() !== PARTNERS_NAME_ROW) return false;  // 「取引先名」列 に対する変更でないとき
