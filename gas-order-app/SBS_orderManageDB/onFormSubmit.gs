@@ -1,7 +1,9 @@
 /**
  * フォームが送信時に発火する関数
+ * 
+ * (※ トリガー設定中)
  */
-function onFormSubmit(e) {
+function onOrderFormSubmit(e) {
   // イベントオブジェクトから、フォームの回答結果を取得
   const received_order = getOrders(e);
 
