@@ -1,0 +1,18 @@
+/** 
+ * デバッグ関数
+ * @param {String | Object} value - 出力する値またはオブジェクト 
+ */
+function debug(value="デバッグテスト") {
+  const log_sheet = ss.getSheetByName("logs");  // シート名を指定してシートオブジェクトを取得
+
+  const date = new Date();  // 現在の日時を取得
+  const targetRow = log_sheet.getLastRow() + 1;  // ログを書き込む行を取得
+  let outPutValue = value;  // 出力する値を格納する変数を初期化
+
+  // 出力する値がオブジェクトの場合、JSON文字列に変換 (オブジェクトのままだと解釈できない表示になるため)
+  if (typeof value === "object") {
+    outPutValue = JSON.stringify(value);
+  }
+  log_sheet.getRange("A" + targetRow).setValue(date);   // A列に出力日時をセット
+  log_sheet.getRange("B" + targetRow).setValue(outPutValue);  // B列にログの出力をセット
+}
