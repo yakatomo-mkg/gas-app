@@ -26,6 +26,6 @@ function updateDaysChoices() {
     item.asListItem().setChoiceValues(generateDaysChoices(30));  // 30日分の選択肢を更新
   } else {
     console.log("「お届け日」の日付更新に失敗しました。");
-    debug("Error: 日付ベーストリガー「お届け日の日付更新」に失敗...");
+    debug("Error: 日付ベーストリガー「お届け日の日付更新」に失敗しました。");
   }
 }

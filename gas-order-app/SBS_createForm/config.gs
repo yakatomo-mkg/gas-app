@@ -36,6 +36,7 @@ const logSheet = getSheet("log");
 /** 各シートのセルの位置や列番号をオブジェクトとして管理 */
 // menuシートの列番号を定義
 const MENU_SHEET_SETTINGS = {
+  contStartRow: 3,  // 操作対象のコンテンツが開始する行(1,2行目はヘッダー)
   ckBoxCol: 1,  // チェックボックス設定列
   itemIdCol: 2,
   itemNameCol: 3,
@@ -46,8 +47,9 @@ const MENU_SHEET_SETTINGS = {
   formTypeCol: 8,
   orderCol: 9,    // orderシートの列番号
   comment: 10,
-  fmStartCol: 13,  // フォームメニュー管理エリアの起点列
-  fmStartRow: 3,   // 　　        　〃　　　　　　　　　　　　　　　　　　　　　起点行
+  fmStartCol: 12,  // フォームメニュー管理エリアの起点列
+  questionIdCell: "S3",  // 「注文ID」の質問IDをセットするセル位置
+  formPublishedUrlCell: "S4",  // 更新後の公開用フォームURLをセットするセル位置
 };
 
 const ORDER_SHEET_SETTINGS = {
@@ -56,19 +58,21 @@ const ORDER_SHEET_SETTINGS = {
   orderIdCol: 3,
   shopNameCol: 4,
   emailCol: 5,
-  menuStartCol: 6,
+  deliDateCol: 6,
+  commentCol: 7,
+  menuStartCol: 8,
 }
 
-/** 指定したシートにおいて、start列およびend列の範囲における最終行を取得する関数 */ 
-function getLastRowInRange(sheet, startCol, endCol, rows = sheet.getLastRow()) {  // 第3引数の「行数」は、デフォルト値を設定
-  const rangeVals = sheet.getRange(1, startCol, rows, endCol - startCol + 1).getValues();
-  for (let i = rangeVals.length - 1; i >= 0; i--) {
-    if (rangeVals[i].some(cell => cell.toString().trim() !== "")) {
-      return i + 1;  // 最終行の行数を返す
-    }
-  }
-  return 0;  // データが存在しない場合は「0」を返す
-}
+// /** 指定したシートにおいて、start列およびend列の範囲における最終行を取得する関数 */ 
+// function getLastRowInRange(sheet, startCol, endCol, rows = sheet.getLastRow()) {  // 第3引数の「行数」は、デフォルト値を設定
+//   const rangeVals = sheet.getRange(1, startCol, rows, endCol - startCol + 1).getValues();
+//   for (let i = rangeVals.length - 1; i >= 0; i--) {
+//     if (rangeVals[i].some(cell => cell.toString().trim() !== "")) {
+//       return i + 1;  // 最終行の行数を返す
+//     }
+//   }
+//   return 0;  // データが存在しない場合は「0」を返す
+// }
 
 
 
@@ -79,19 +83,3 @@ const FORM_ID = "1o6VEexBIj7W3CLsws4WAo-HdQvf77uEIrDSEIUeeGbU"
 const form = FormApp.openById(FORM_ID);
 
 
-
-const arrTrim = () => {
-  const rangeVal = menuSheet.getRange(1, 13, 20, 4).getValues();
-  // console.log(rangeVal);
-  // console.log(rangeVal[0][0]);
-  // console.log(rangeVal.length);
-
-  let lastRow = 0;
-  for (let i = rangeVal.length - 1; i >= 0; i--) {
-    if (rangeVal[i].some(cell => cell.toString().trim() !== "")) {
-      lastRow = ++i;
-      break;
-    }
-  }
-  console.log(lastRow);
-}
